@@ -1,20 +1,3 @@
-# PFLlib: Personalized Federated Learning Algorithm Library
-# Copyright (C) 2021  Jianqing Zhang
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
 import numpy as np
 import os
 import torch
@@ -41,27 +24,19 @@ def read_data(dataset, idx, is_train=True):
 
 
 def read_client_data(dataset, idx, is_train=True):
-    # 如果数据集包含字符串News，调用read_client_data_text函数加载客户端数据
     if "News" in dataset:
         return read_client_data_text(dataset, idx, is_train)
-    # 如果如果数据集名称包含字符串shakespeare，则调用read_client_data_Shakespeare函数来加载数据集中的客户端数据
     elif "Shakespeare" in dataset:
         return read_client_data_Shakespeare(dataset, idx)
 
-    # 如果是要训练
     if is_train:
-        # 读取训练集中指定客户端的数据
         train_data = read_data(dataset, idx, is_train)
-        # 将训练数据的特征转换为PyTorch张量，指定类型浮点型
         X_train = torch.Tensor(train_data['x']).type(torch.float32)
-        # 将训练数据的标签转换为PyTorch张量，指定类型为整型
         y_train = torch.Tensor(train_data['y']).type(torch.int64)
 
-        # 将特征和标签组成一个元组形式，组合成一个列表
         train_data = [(x, y) for x, y in zip(X_train, y_train)]
         return train_data
     else:
-        # 训练集操作类似
         test_data = read_data(dataset, idx, is_train)
         X_test = torch.Tensor(test_data['x']).type(torch.float32)
         y_test = torch.Tensor(test_data['y']).type(torch.int64)

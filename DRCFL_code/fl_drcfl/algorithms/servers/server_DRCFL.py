@@ -2,8 +2,8 @@ import copy
 import time
 import torch
 import torch.nn as nn
-from fl_library.algorithms.clients.client_DRCFL import client_DRCFL
-from fl_library.algorithms.servers.serverbase import Server
+from fl_drcfl.algorithms.clients.client_DRCFL import client_DRCFL
+from fl_drcfl.algorithms.servers.serverbase import Server
 from torch.utils.data import DataLoader
 
 class DRCFL(Server):

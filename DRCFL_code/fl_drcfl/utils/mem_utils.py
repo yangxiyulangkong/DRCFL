@@ -1,20 +1,3 @@
-# PFLlib: Personalized Federated Learning Algorithm Library
-# Copyright (C) 2021  Jianqing Zhang
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
 import math
 import gc
 from collections import defaultdict
@@ -121,21 +104,19 @@ class MemReporter():
             memory_size = math.ceil(fact_memory_size / PYTORCH_MIN_ALLOCATE) \
                     * PYTORCH_MIN_ALLOCATE
 
-            # tensor.storage should be the actual object related to memory
-            # allocation
+
             data_ptr = tensor.storage().data_ptr()
             if data_ptr in visited_data:
                 name = '{}(->{})'.format(
                     name,
                     visited_data[data_ptr],
                 )
-                # don't count the memory for reusing same underlying storage
+
                 memory_size = 0
             else:
                 visited_data[data_ptr] = name
 
             size = tuple(tensor.size())
-            # torch scalar has empty size
             if not size:
                 size = (1,)
 
@@ -163,13 +144,7 @@ class MemReporter():
         self.device_mapping.clear()
 
     def print_stats(self, verbose: bool = False, target_device: Optional[torch.device] = None) -> None:
-        # header
-        # show_reuse = verbose
-        # template_format = '{:<40s}{:>20s}{:>10s}'
-        # print(template_format.format('Element type', 'Size', 'Used MEM') )
         for device, tensor_stats in self.device_tensor_stat.items():
-            # By default, if the target_device is not specified,
-            # print tensors on all devices
             if target_device is not None and device != target_device:
                 continue
             # print('-' * LEN)
@@ -178,13 +153,6 @@ class MemReporter():
             total_numel = 0
             for stat in tensor_stats:
                 name, size, numel, mem = stat
-                # if not show_reuse:
-                #     name = name.split('(')[0]
-                # print(template_format.format(
-                #     str(name),
-                #     str(size),
-                #     readable_size(mem),
-                # ))
                 total_mem += mem
                 total_numel += numel
 

@@ -55,10 +55,6 @@ def generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partitio
     dataset_image = np.array(dataset_image)
     dataset_label = np.array(dataset_label)
 
-    # dataset = []
-    # for i in range(num_classes):
-    #     idx = dataset_label == i
-    #     dataset.append(dataset_image[idx])
 
     X, y, statistic = separate_data((dataset_image, dataset_label), num_clients, num_classes,
                                     niid, balance, partition)
@@ -74,7 +70,6 @@ if __name__ == "__main__":
 
     generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition)
 
-# 使用方法
 # cd ./dataset
 # python generate_MNIST.py iid - - # for iid and unbalanced scenario
 # python generate_MNIST.py iid balance - # for iid and balanced scenario

@@ -1,35 +1,21 @@
 import os
 import ujson
 import numpy as np
-import gc
 from sklearn.model_selection import train_test_split
 
 
-batch_size = 50   # 每一轮的样本数量
-train_size = 0.75  # 训练集的比例75% merge original training set and test set, then split it manually.
-least_samples = 1  # 确保至少每个客户端有一个测试样本 guarantee that each client must have at least one samples for testing.
-alpha = 0.1  # 狄利克雷分布  for Dirichlet distribution
+batch_size = 50
+train_size = 0.75
+least_samples = 1
+alpha = 0.1
 
 
-# check函数
-# config_path用于表示配置文件路径
-# train_path用于表示训练集路径
-# test_path用于表示测试集路径
-# num_clients表示参与分布式客户端的数量
-# num_classes表示数据集中类别数量
-# niid布尔类型，表示是否为独立同分布
-# balance表示数据是否要相对平衡的分给各个客户端
-# partition一个可选的参数，表示数据集的分割方式。这个参数可能会被用来定义不同的数据分配策略
 def check(config_path, train_path, test_path, num_clients, num_classes, niid=False,
           balance=True, partition=None):
-    # check existing dataset
-    # 检查是否存在这个配置文件
+
     if os.path.exists(config_path):
-        # 如果配置文件存在，则使用open()函数打开配置文件，模式为只读（'r'），并将其赋给变量f
         with open(config_path, 'r') as f:
-            # 使用ujson.load()函数打卡配置文件，加载json数据并将其解析为Python字典对象config。ujson是一个JSON解析器，与Python标准库中的json模块相似，但更快。
             config = ujson.load(f)
-            # 判断当前配置文件中的参数与此次获取数据集提供的参数是否相同
         if config['num_clients'] == num_clients and \
                 config['num_classes'] == num_classes and \
                 config['non_iid'] == niid and \
@@ -37,68 +23,40 @@ def check(config_path, train_path, test_path, num_clients, num_classes, niid=Fal
                 config['partition'] == partition and \
                 config['alpha'] == alpha and \
                 config['batch_size'] == batch_size:
-            # 如果配置文件中所有参数与此次所给参数相同，则之间返回，并打印该数据集已有
             print("\nDataset already generated.\n")
             return True
 
-    # 获取训练集文件夹名称
     dir_path = os.path.dirname(train_path)
-    # 判断该文件夹是否存在，不存在为True
     if not os.path.exists(dir_path):
-        # 如果不存在，创建该文件夹
         os.makedirs(dir_path)
 
-    # 测试集流程，与上面一样
     dir_path = os.path.dirname(test_path)
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
     return False
 
-# 数据分割函数
-# data是原始数据集
-# num_clients是客户端的数量
-# num_classes数据集中类数量，例如CIFAR-10就是10个类
-# niid是否独立同分布
-# balance是否每个数据集均匀数量
-# partition用于指定预定义的数据分区
-# class_per_client指定每个客户端包含类别个数，默认为2。只能在数据生成时修改
 def separate_data(data, num_clients, num_classes, niid=False, balance=False, partition=None, class_per_client=2):
-    # 一个列表，用于存储客户端特征数据，_是一个占位符，表示循环中不需要使用循环变量值
     X = [[] for _ in range(num_clients)]
-    # 一个列表，用于存储客户端标签数据
     y = [[] for _ in range(num_clients)]
-    # 列表，用于存储统计信息
     statistic = [[] for _ in range(num_clients)]
 
-    # dataset_content用于记录样本特征，dataset_label用于记录样本标签
     dataset_content, dataset_label = data
-    # 创建一个空字典，用于存储每个样本索引信息
     dataidx_map = {}
 
-    # 如果是iid分布，让partition为pat，每个客户端拥有的样本类等于总的样本类
     if not niid:
         partition = 'pat'
         class_per_client = num_classes
 
-    # 如果是partition是pat
     if partition == 'pat':
-        # 创建了一个包含了所有样本索引的NumPy数组，它的长度等于dataset_label的长度，也就是数据集中的样本数量。
         idxs = np.array(range(len(dataset_label)))
-        # 创建了一个空列表，用于存储每个类别的样本索引。
         idx_for_each_class = []
-        # 循环次数等于类别数量
         for i in range(num_classes):
-            # 从idxs中筛选出属于当前类别i的样本的索引，并将其存储到idx_for_each_class中。idx_for_each_class列表中的每个元素都是一个数组，包含了属于同一个类别的样本的索引。
             idx_for_each_class.append(idxs[dataset_label == i])
 
-        # 用于记录每个客户端应该包含的类数
         class_num_per_client = [class_per_client for _ in range(num_clients)]
-        # 循环次数为数据类数
         for i in range(num_classes):
-            # 空列表，存储选中的客户端
             selected_clients = []
-            # 循环次数为客户端总数
             for client in range(num_clients):
                 if class_num_per_client[client] > 0:
                     selected_clients.append(client)
@@ -125,7 +83,6 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
                 class_num_per_client[client] -= 1
 
     elif partition == "dir":
-        # https://github.com/IBM/probabilistic-federated-neural-matching/blob/master/experiment.py
         min_size = 0
         K = num_classes
         N = len(dataset_label)
@@ -163,8 +120,6 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
             statistic[client].append((int(i), int(sum(y[client] == i))))
 
     del data
-    # gc.collect()
-
     for client in range(num_clients):
         print(f"Client {client}\t Size of data: {len(X[client])}\t Labels: ", np.unique(y[client]))
         print(f"\t\t Samples of labels: ", [i for i in statistic[client]])
@@ -172,9 +127,7 @@ def separate_data(data, num_clients, num_classes, niid=False, balance=False, par
 
     return X, y, statistic
 
-# 将每个客户端数据按测试集和训练集分开
 def split_data(X, y):
-    # Split dataset
     train_data, test_data = [], []
     num_samples = {'train': [], 'test': []}
 
@@ -192,7 +145,6 @@ def split_data(X, y):
     print("The number of test samples:", num_samples['test'])
     print()
     del X, y
-    # gc.collect()
 
     return train_data, test_data
 
@@ -210,7 +162,6 @@ def save_file(config_path, train_path, test_path, train_data, test_data, num_cli
         'batch_size': batch_size,
     }
 
-    # gc.collect()
     print("Saving to disk.\n")
 
     for idx, train_dict in enumerate(train_data):

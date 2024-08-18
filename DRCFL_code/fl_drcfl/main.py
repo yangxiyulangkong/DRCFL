@@ -1,21 +1,3 @@
-# PFLlib: Personalized Federated Learning Algorithm Library
-# Copyright (C) 2021  Jianqing Zhang
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-#!/usr/bin/env python
 import copy
 import torch
 import argparse
@@ -38,8 +20,7 @@ logger.setLevel(logging.ERROR)
 warnings.simplefilter("ignore")
 torch.manual_seed(0)
 
-# hyper-params for Text tasks
-vocab_size = 98635   #98635 for AG_News and 399198 for Sogou_News
+vocab_size = 98635
 max_len=200
 emb_dim=32
 
@@ -105,7 +86,6 @@ def run(args):
     reporter.report()
 
 if __name__ == "__main__":
-    # 每个客户端里面的数据类别数量只能在data_utils里面改
 
     total_start = time.time()
 

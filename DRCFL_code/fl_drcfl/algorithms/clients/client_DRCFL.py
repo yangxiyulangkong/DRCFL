@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import time
-from fl_library.algorithms.clients.clientbase import Client
+from fl_drcfl.algorithms.clients.clientbase import Client
 from collections import defaultdict
 
 
