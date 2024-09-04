@@ -2,7 +2,6 @@
 
 In this repository, we release the official implementation for DRCFLL algorithm in master branch.
 
-# Usage
 You should start by running the generate_cifar10.py code in datasets to download and generate a dataset ready for training.
 
 # Acknowledgements
