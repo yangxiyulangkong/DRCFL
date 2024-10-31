@@ -71,8 +71,8 @@ if __name__ == "__main__":
     generate_cifar10(dir_path, num_clients, num_classes, niid, balance, partition)
 
 # cd ./dataset
-# python generate_MNIST.py iid - - # for iid and unbalanced scenario
-# python generate_MNIST.py iid balance - # for iid and balanced scenario
-# python generate_MNIST.py noniid - pat # for pathological noniid and unbalanced scenario
-# python generate_MNIST.py noniid - dir # for practical noniid and unbalanced scenario
-# python generate_MNIST.py noniid - exdir # for Extended Dirichlet strategy
+# python generate_cifar10.py iid 
+# python generate_cifar10.py iid balance 
+# python generate_cifar10.py noniid - pat 
+# python generate_cifar10.py noniid - dir
+# python generate_cifar10.py noniid - exdir
